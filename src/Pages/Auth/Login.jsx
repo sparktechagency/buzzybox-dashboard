@@ -1,15 +1,32 @@
-import { Button, Checkbox, Form, Input } from "antd";
+import { Checkbox, Form, Input } from "antd";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import FormItem from "../../components/common/FormItem";
-// import Cookies from "js-cookie";
+import toast, { LoaderIcon } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { saveToAuth } from "../../redux/features/auth/authSlice";
+import { useLoginMutation } from "../../redux/features/auth/authApi";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [login, { isLoading }] = useLoginMutation();
 
   const onFinish = async (values) => {
-    navigate("/");
-    // Cookies.set('token', token, { expires: 7 })
+    toast.loading("Logging in...", { id: "loginToast" });
+    try {
+      const response = await login(values).unwrap();
+
+      if (response.success) {
+        toast.success("Login Successful", { id: "loginToast" });
+        const accessToken = response?.data?.accessToken;
+        dispatch(saveToAuth({ data: { accessToken } }));
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error(error || "Something went wrong", { id: "loginToast" });
+      console.log(error);
+    }
   };
 
   return (
@@ -96,7 +113,7 @@ const Login = () => {
             }}
             className="flex items-center justify-center bg-gtdandy rounded-lg text-base"
           >
-            {/* {isLoading? < Spinner/> : "Sign in"} */} Sign in
+            {isLoading ? <LoaderIcon /> : "Sign in"}
           </button>
         </Form.Item>
       </Form>
