@@ -92,7 +92,7 @@ const Login = () => {
 
           <a
             className="login-form-forgot text-[#edb50e] hover:text-gtdandy font-semibold"
-            href="/auth/forgot-password"
+            href={`/auth/forgot-password?action=reset-password`}
           >
             Forgot password
           </a>

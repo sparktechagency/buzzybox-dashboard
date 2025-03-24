@@ -2,18 +2,55 @@ import { Button, Form, Typography } from "antd";
 import React, { useState } from "react";
 import OTPInput from "react-otp-input";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  useOtpVerifyMutation,
+  useResendOtpMutation,
+} from "../../redux/apiSlices/authSlice";
+import toast from "react-hot-toast";
 const { Text } = Typography;
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState();
   const email = new URLSearchParams(location.search).get("email");
+  const [verifyOtp] = useOtpVerifyMutation();
+  const [resendOtp] = useResendOtpMutation();
 
-  const onFinish = async (values) => {
-    navigate(`/auth/reset-password?email=${email}`);
+  // handle otp verification
+  const onFinish = async () => {
+    toast.loading("Verifying OTP...", { id: "otpVerifyToast" });
+    try {
+      const data = {
+        email: email,
+        oneTimeCode: Number(otp),
+      };
+      const response = await verifyOtp(data).unwrap();
+      if (response.success) {
+        toast.success("OTP verified successfully", { id: "otpVerifyToast" });
+        navigate(`/auth/reset-password?email=${email}&auth=${response.data}`);
+      }
+    } catch (error) {
+      toast.error("Invalid OTP", { id: "otpVerifyToast" });
+      console.log(error);
+    }
   };
 
-  const handleResendEmail = async () => {};
+  // handle resend otp
+  const handleResendOtp = async () => {
+    toast.loading("Resending OTP...", { id: "resendOtpToast" });
+    try {
+      const data = {
+        email: email,
+      };
+      const response = await resendOtp(data).unwrap();
+      if (response.success) {
+        toast.success("OTP sent successfully", { id: "resendOtpToast" });
+      }
+    } catch (error) {
+      toast.error("Failed to resend OTP", { id: "resendOtpToast" });
+      console.log;
+    }
+  };
 
   return (
     <div>
@@ -50,7 +87,7 @@ const VerifyOtp = () => {
           <Text>Don't received code?</Text>
 
           <p
-            onClick={handleResendEmail}
+            onClick={handleResendOtp}
             className="login-form-forgot"
             style={{ color: "#ffc301 ", cursor: "pointer" }}
           >

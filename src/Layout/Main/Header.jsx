@@ -7,7 +7,10 @@ import { Badge, Space, Flex } from "antd";
 import { Avatar, Dropdown, ConfigProvider } from "antd";
 import { useUser } from "../../provider/User";
 import logo from "../../assets/gtdandy/logo.png";
+import { useDispatch } from "react-redux";
+import { logOut } from "../../redux/features/auth/authSlice";
 const Header = () => {
+  const dispatch = useDispatch();
   const { user } = useUser();
   const src = user?.image?.startsWith("https")
     ? user?.image
@@ -15,7 +18,11 @@ const Header = () => {
 
   const items = [
     {
-      label: <Link to="auth/login">Log Out</Link>,
+      label: (
+        <Link to="auth/login" onClick={() => dispatch(logOut())}>
+          Log Out
+        </Link>
+      ),
       key: "0",
     },
   ];

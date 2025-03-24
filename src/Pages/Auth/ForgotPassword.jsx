@@ -1,12 +1,28 @@
 import { Button, Form, Input, ConfigProvider } from "antd";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useForgotPasswordMutation } from "../../redux/apiSlices/authSlice";
+import toast from "react-hot-toast";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  const [forgotPassword] = useForgotPasswordMutation();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  const action = searchParams.get("action");
 
   const onFinish = async (values) => {
-    navigate(`/auth/verify-otp?email=${values?.email}`);
+    toast.loading("Sending OTP...", { id: "forgotPasswordToast" });
+    try {
+      const { data: res } = await forgotPassword(values);
+      if (res.success) {
+        toast.success("OTP sent successfully", { id: "forgotPasswordToast" });
+        navigate(`/auth/verify-otp?email=${values?.email}&action=${action}`);
+      }
+    } catch (error) {
+      toast.error(error.data.message, { id: "forgotPasswordToast" });
+    }
   };
 
   return (
