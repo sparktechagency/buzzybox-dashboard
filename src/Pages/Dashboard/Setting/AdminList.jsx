@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaPlus } from "react-icons/fa6";
 import {
   Flex,
@@ -14,36 +14,30 @@ import {
 import { MoreOutlined, DeleteFilled, EditFilled } from "@ant-design/icons";
 
 import ButtonEDU from "../../../components/common/ButtonEDU";
+import {
+  useCreateAdminMutation,
+  useGetAllAdminsQuery,
+} from "../../../redux/features/admin/adminApi";
+import toast from "react-hot-toast";
 
 const AdminList = () => {
-  // Initial data
-  const initialData = [
-    {
-      key: 1,
-      name: "Tom Hardy",
-      email: "tom.hardy@gmail.com",
-      role: "Admin",
-      creationdate: "13 Feb 2020",
-    },
-    {
-      key: 2,
-      name: "Emma Stone",
-      email: "emma.stone@example.com",
-      role: "Admin",
-      creationdate: "10 Jan 2021",
-    },
-    {
-      key: 3,
-      name: "Robert Downey",
-      email: "rdj@avengers.com",
-      role: "Admin",
-      creationdate: "25 Dec 2019",
-    },
-  ];
+  const { data, isLoading } = useGetAllAdminsQuery();
+  const adminsData = data?.data?.data;
+  const meta = data?.data?.meta;
+
+  // format admins data with adding Key property
+  useEffect(() => {
+    const formatedAdminsData = adminsData?.map((admin, index) => ({
+      ...admin,
+      key: index + 1,
+    }));
+    setAdmins(formatedAdminsData);
+    setFilteredData(formatedAdminsData);
+  }, [isLoading]);
 
   const [searchText, setSearchText] = useState("");
-  const [admins, setAdmins] = useState(initialData);
-  const [filteredData, setFilteredData] = useState(initialData);
+  const [admins, setAdmins] = useState(adminsData);
+  const [filteredData, setFilteredData] = useState(adminsData);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -51,6 +45,7 @@ const AdminList = () => {
 
   const [selectedAdmin, setSelectedAdmin] = useState(null);
 
+  const [form] = Form.useForm();
   const addFormRef = useRef(null);
   const editFormRef = useRef(null);
 
@@ -80,7 +75,11 @@ const AdminList = () => {
     message.info("Admin addition cancelled.");
   };
 
-  const handleAddAdmin = (values) => {
+  const [addAdmin] = useCreateAdminMutation();
+
+  const handleAddAdmin = async () => {
+    toast.loading("Adding...", { id: "addAdminToast" });
+    const values = await form.validateFields();
     // Ensure characters after ".com" are removed
     const cleanEmail = values.email.replace(/\.com.*/i, ".com");
 
@@ -88,16 +87,24 @@ const AdminList = () => {
       key: admins.length + 1,
       ...values,
       email: cleanEmail, // Apply cleaned email
-      creationdate: new Date().toLocaleDateString(),
+      role: "Admin",
     };
 
-    const updatedAdmins = [...admins, newAdmin];
-    setAdmins(updatedAdmins);
-    setFilteredData(updatedAdmins);
-    setIsAddModalOpen(false);
-    addFormRef.current?.resetFields();
-
-    message.success("Admin added successfully!");
+    try {
+      const res = await addAdmin({ payload: newAdmin }).unwrap();
+      console.log(res);
+      if (res.success) {
+        toast.success(res.message || "Added successfully", {
+          id: "addAdminToast",
+        });
+        setIsAddModalOpen(false);
+        addFormRef.current?.resetFields();
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong", {
+        id: "addAdminToast",
+      });
+    }
   };
 
   // Open Edit Admin Modal
@@ -181,7 +188,7 @@ const AdminList = () => {
             },
           }}
         >
-          <Form layout="vertical" ref={addFormRef} onFinish={handleAddAdmin}>
+          <Form form={form} layout="vertical" ref={addFormRef}>
             <Form.Item
               label="Name"
               name="name"
@@ -216,18 +223,7 @@ const AdminList = () => {
             >
               <Input placeholder="Email" className="h-12" />
             </Form.Item>
-            <Form.Item
-              label="Role"
-              name="role"
-              rules={[{ required: true, message: "Please enter Role" }]}
-            >
-              <Input
-                placeholder="Admin"
-                className="h-12"
-                value="Admin"
-                disabled={true}
-              />
-            </Form.Item>
+
             <Form.Item
               label="Password"
               name="password"
@@ -238,10 +234,7 @@ const AdminList = () => {
 
             <div className="flex justify-end gap-4 mt-4">
               <ButtonEDU actionType="cancel" onClick={handleCancelAdd} />
-              <ButtonEDU
-                actionType="save"
-                onClick={() => addFormRef.current?.submit()}
-              />
+              <ButtonEDU actionType="save" onClick={handleAddAdmin} />
             </div>
           </Form>
         </ConfigProvider>

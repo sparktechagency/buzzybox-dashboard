@@ -15,7 +15,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Profile", "GiftCard"],
+  tagTypes: ["Profile", "GiftCard", "Admin", "User"],
   endpoints: () => ({}),
 });
 
