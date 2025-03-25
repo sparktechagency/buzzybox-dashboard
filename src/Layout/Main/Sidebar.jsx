@@ -19,6 +19,8 @@ import { AiOutlineUser } from "react-icons/ai";
 import { PiCirclesThreePlusLight } from "react-icons/pi";
 import { RiSettings5Line } from "react-icons/ri";
 import { FiLogOut } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { logOut } from "../../redux/features/auth/authSlice";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -26,9 +28,10 @@ const Sidebar = () => {
   const [selectedKey, setSelectedKey] = useState("");
   const [openKeys, setOpenKeys] = useState([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    dispatch(logOut());
     navigate("/auth/login");
   };
 

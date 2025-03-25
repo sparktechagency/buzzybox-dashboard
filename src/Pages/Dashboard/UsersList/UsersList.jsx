@@ -71,7 +71,7 @@ function UsersList() {
             prefix={<SearchOutlined />}
             style={{ width: 200, height: 45 }}
           />
-          <ConfigProvider
+          {/* <ConfigProvider
             theme={{
               components: {
                 Button: {
@@ -93,7 +93,7 @@ function UsersList() {
                 Delete Selected
               </Button>
             )}
-          </ConfigProvider>
+          </ConfigProvider> */}
         </div>
       </div>
 
@@ -145,9 +145,5 @@ const columns = [
     title: "Total Gift Card Sent",
     dataIndex: "giftsent",
     key: "giftsent",
-  },
-  {
-    key: "action",
-    render: () => <MoreOutlined className="cursor-pointer w-10 h-10" />,
   },
 ];
