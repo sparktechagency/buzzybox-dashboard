@@ -22,6 +22,7 @@ export const api = createApi({
     "User",
     "Transaction",
     "PrivacyPolicy",
+    "Faq",
   ],
   endpoints: () => ({}),
 });

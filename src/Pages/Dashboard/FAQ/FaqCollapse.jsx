@@ -3,8 +3,13 @@ import { Collapse, Modal, Form, Input, ConfigProvider, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import FaqPopover from "../../../components/common/PopContent";
 import ButtonEDU from "../../../components/common/ButtonEDU";
-
-const defaultText = `A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.`;
+import {
+  useCreateFaqMutation,
+  useDeleteFaqMutation,
+  useGetAllFaqsQuery,
+  useUpdateFaqMutation,
+} from "../../../redux/features/faq/faqApi";
+import toast from "react-hot-toast";
 
 // FAQ Header Component
 export const HeadFaq = ({ showModal }) => (
@@ -23,10 +28,13 @@ export const HeadFaq = ({ showModal }) => (
 // FAQ Collapse Component
 export default function FaqCollapse() {
   const [activeKeys, setActiveKeys] = useState(["1"]);
+  const { data } = useGetAllFaqsQuery();
+  const faqData = data?.data?.data;
+
   const [faqs, setFaqs] = useState([
-    { key: "1", question: "What is a dog?", answer: defaultText },
-    { key: "2", question: "What is a cat?", answer: defaultText },
-    { key: "3", question: "What is a bird?", answer: defaultText },
+    { key: "1", question: "What is a dog?" },
+    { key: "2", question: "What is a cat?" },
+    { key: "3", question: "What is a bird?" },
   ]);
 
   // State for Add/Edit FAQ Modal
@@ -37,6 +45,11 @@ export default function FaqCollapse() {
   // State for Delete Confirmation Modal
   const [deleteFaq, setDeleteFaq] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // backend api
+  const [addFaq] = useCreateFaqMutation();
+  const [updateFaq] = useUpdateFaqMutation();
+  const [deleteFaqFn] = useDeleteFaqMutation();
 
   // Open modal for adding a new FAQ
   const showAddModal = () => {
@@ -58,53 +71,81 @@ export default function FaqCollapse() {
     setIsDeleteModalOpen(true);
   };
 
-  // Handle Save (Both Add & Edit)
-  const handleSave = (values) => {
+  // Handle update faq or add
+  const handleSave = async (values) => {
     if (editFaq) {
-      // Update existing FAQ
-      setFaqs(
-        faqs.map((item) =>
-          item.key === editFaq.key
-            ? { ...item, question: values.question, answer: values.answer }
-            : item
-        )
-      );
-      message.success("FAQ updated successfully!");
+      // edit faq
+      toast.loading("Updating...", { id: "faqUpdateToast" });
+      try {
+        const res = await updateFaq({
+          payload: values,
+          id: editFaq._id,
+        }).unwrap();
+        if (res.success) {
+          toast.success(res.message || "Updated successfully", {
+            id: "faqUpdateToast",
+          });
+          setIsModalOpen(false);
+        }
+      } catch (error) {
+        toast.error(error?.data?.message || "Failed to udpate", {
+          id: "faqUpdateToast",
+        });
+      }
     } else {
-      // Add new FAQ
-      const newKey = (faqs.length + 1).toString();
-      setFaqs([
-        ...faqs,
-        { key: newKey, question: values.question, answer: values.answer },
-      ]);
-      message.success("FAQ added successfully!");
+      // add faq
+      toast.loading("Adding...", { id: "faqAddToast" });
+      try {
+        const res = await addFaq({ payload: values }).unwrap();
+        if (res.success) {
+          toast.success(res.message || "Added successfully", {
+            id: "faqAddToast",
+          });
+          setIsModalOpen(false);
+        }
+      } catch (error) {
+        toast.error(error?.data?.message || "Failed to add", {
+          id: "faqAddToast",
+        });
+      }
     }
-
-    setIsModalOpen(false);
   };
 
   // Handle Delete FAQ
-  const handleDelete = () => {
-    setFaqs(faqs.filter((faq) => faq.key !== deleteFaq.key));
-    setIsDeleteModalOpen(false);
-    message.success("FAQ deleted successfully!");
+  const handleDelete = async () => {
+    toast.loading("Deleting...", { id: "faqDeleteToast" });
+    try {
+      const res = await deleteFaqFn({ id: deleteFaq._id }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Deleted successfully", {
+          id: "faqDeleteToast",
+        });
+        setIsDeleteModalOpen(false);
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete", {
+        id: "faqDeleteToast",
+      });
+    }
   };
 
   // Generate FAQ items
   const getItems = () =>
-    faqs.map(({ key, question, answer }) => ({
-      key,
-      label: (
-        <div className="flex items-center justify-between ">
-          {question}
-          <FaqPopover
-            onEdit={() => showEditModal({ key, question, answer })}
-            onDelete={() => showDeleteModal({ key, question })}
-          />
-        </div>
-      ),
-      children: <p className="border-l-2 border-yellow-400 pl-4">{answer}</p>,
-    }));
+    faqData?.map(({ _id, question, answer }) => {
+      return {
+        _id,
+        label: (
+          <div className="flex items-center justify-between ">
+            {question}
+            <FaqPopover
+              onEdit={() => showEditModal({ _id, question, answer })}
+              onDelete={() => showDeleteModal({ _id, question })}
+            />
+          </div>
+        ),
+        children: <p className="border-l-2 border-yellow-400 pl-4">{answer}</p>,
+      };
+    });
 
   return (
     <div className="min-h-[90vh] px-10">
