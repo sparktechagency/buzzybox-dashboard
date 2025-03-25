@@ -7,7 +7,7 @@ const userSlice = api.injectEndpoints({
         const params = new URLSearchParams();
         if (page) params.append("page", page);
         if (searchTerm) params.append("searchTerm", searchTerm);
-        console.log(params);
+        
         return {
           url: `/gift-cards/count-gift-cards?${params.toString()}`,
           method: "GET",

@@ -5,56 +5,25 @@ import {
   SearchOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import user from "../../../assets/gtdandy/user.png";
+import { useGetAllTransactionsQuery } from "../../../redux/features/transaction/transactionApi";
+import { maskLongString } from "../../../utils/maskLongString";
+import { imageUrl } from "../../../redux/api/baseApi";
 
 // UserAvatar Component
 const UserAvatar = ({ user }) => (
   <div className="flex gap-2 items-center">
-    <Avatar shape="square" size={30} src={user} />
-    <p>John Doe</p>
+    <Avatar shape="square" size={30} src={`${imageUrl}${user?.profile}`} />
+    <p>{user?.name}</p>
   </div>
 );
-
-// Sample Data
-const initialData = [
-  {
-    key: 1,
-    date: "2021-09-01",
-    customername: user,
-    recipientname: "John Lennon",
-    ocation: "Birthday",
-    price: "$ 5",
-    status: "Sent",
-  },
-  {
-    key: 2,
-    date: "2021-10-15",
-    customername: user,
-    recipientname: "Paul McCartney",
-    ocation: "Anniversary",
-    price: "$ 10",
-    status: "pending",
-  },
-];
-
 function Transaction() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [data, setData] = useState(initialData);
 
-  // Handle search input change
-  const handleSearch = (value) => setSearchQuery(value);
-
-  // Filter data based on search query
-  const filteredData = data.filter(
-    (transaction) =>
-      transaction.recipientname
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      transaction.ocation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.price.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const { data } = useGetAllTransactionsQuery({ page, limit });
+  const transactions = data?.data[0]?.data;
+  const metaData = data?.data[0]?.meta;
 
   // Handle row selection
   const rowSelection = {
@@ -62,20 +31,18 @@ function Transaction() {
     onChange: (keys) => setSelectedRowKeys(keys),
   };
 
-  // Handle delete function
-  const handleDelete = () => {
-    setData(data.filter((item) => !selectedRowKeys.includes(item.key)));
-    setSelectedRowKeys([]);
-  };
+  // format data for table
+  const formatedTransactions = transactions?.map((item, index) => ({
+    key: index + 1,
+    customername: item?.user,
+    recipientname: item?.coverPage?.recipientName,
+    paymentId: item?.paymentIntentId,
+    price: item?.price,
+    status: item?.paymentStatus,
+  }));
 
   // Columns Definition
   const columns = [
-    {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-      render: (date) => <p>{new Date(date).toLocaleDateString()}</p>,
-    },
     {
       title: "Customer Name",
       dataIndex: "customername",
@@ -88,9 +55,10 @@ function Transaction() {
       key: "recipientname",
     },
     {
-      title: "Ocation",
-      dataIndex: "ocation",
-      key: "ocation",
+      title: "Payment ID",
+      dataIndex: "paymentId",
+      key: "paymentId",
+      render: (paymentId) => <p>{maskLongString(paymentId)}</p>,
     },
     {
       title: "Price",
@@ -115,10 +83,10 @@ function Transaction() {
         </p>
       ),
     },
-    {
-      key: "action",
-      render: () => <MoreOutlined className="cursor-pointer w-10 h-10" />,
-    },
+    // {
+    //   key: "action",
+    //   render: () => <MoreOutlined className="cursor-pointer w-10 h-10" />,
+    // },
   ];
 
   return (
@@ -136,22 +104,18 @@ function Transaction() {
       }}
     >
       {/* Pass selectedRowKeys and handleDelete to Head */}
-      <Head
-        onSearch={handleSearch}
-        pagename="Transactions"
-        selectedRowKeys={selectedRowKeys}
-        handleDelete={handleDelete}
-      />
+      <Head pagename="Transactions" selectedRowKeys={selectedRowKeys} />
 
       <Table
         columns={columns}
         rowSelection={rowSelection}
-        dataSource={filteredData}
+        dataSource={formatedTransactions}
         className="px-10"
         pagination={{
           pageSizeOptions: [5, 10, 15, 20],
           defaultPageSize: 5,
           position: ["bottomCenter"],
+          onChange: (page) => setPage(page),
         }}
       />
     </ConfigProvider>
@@ -161,7 +125,7 @@ function Transaction() {
 export default Transaction;
 
 // Head Component (for Search Bar and Delete Button)
-function Head({ onSearch, pagename, selectedRowKeys, handleDelete }) {
+function Head({ pagename }) {
   return (
     <ConfigProvider
       theme={{
@@ -177,22 +141,12 @@ function Head({ onSearch, pagename, selectedRowKeys, handleDelete }) {
       <div className="flex justify-between items-center px-10 py-5">
         <h1 className="text-[20px] font-medium">{pagename}</h1>
         <div className="flex gap-3 items-center">
-          <Input
+          {/* <Input
             placeholder="Search by Recipient, Ocation, Price, or Status"
             onChange={(e) => onSearch(e.target.value)}
             prefix={<SearchOutlined />}
             style={{ width: 200, height: 45 }}
-          />
-          {/* Conditionally show delete button next to search input */}
-          {selectedRowKeys.length > 0 && (
-            <Button
-              onClick={handleDelete}
-              icon={<DeleteOutlined />}
-              className="bg-gtdandy text-white px-4 h-11 rounded"
-            >
-              Delete Selected
-            </Button>
-          )}
+          /> */}
         </div>
       </div>
     </ConfigProvider>
