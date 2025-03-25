@@ -1,13 +1,30 @@
 import { Button, Form, Input, ConfigProvider } from "antd";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useResetPasswordMutation } from "../../redux/apiSlices/authSlice";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
-  const email = new URLSearchParams(location.search).get("email");
+  const token = new URLSearchParams(location.search).get("auth");
   const navigate = useNavigate();
+  const [resetPassword] = useResetPasswordMutation();
 
   const onFinish = async (values) => {
-    navigate(`/auth/login`);
+    toast.loading("Updating password...", { id: "updatePasswordToast" });
+    try {
+      const response = await resetPassword({ payload: values, token }).unwrap();
+      if (response.success) {
+        toast.success(response.message || "Password reseted successfully", {
+          id: "updatePasswordToast",
+        });
+        navigate("/auth/login");
+      }
+    } catch (error) {
+      toast.error(error.data.message || "Failed to update", {
+        id: "updatePasswordToast",
+      });
+      console.log("error", error);
+    }
   };
 
   return (

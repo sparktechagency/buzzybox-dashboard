@@ -2,33 +2,33 @@ import React from "react";
 import { Form, Input, Card, Flex, ConfigProvider, message } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import ButtonEDU from "../../../components/common/ButtonEDU";
+import toast from "react-hot-toast";
+import { useChangePasswordMutation } from "../../../redux/apiSlices/authSlice";
 
 function AdminPassword() {
   const [form] = Form.useForm(); // Form instance
-
-  // Handle cancel: Reset form fields
-  const handleCancel = () => {
-    form.resetFields();
-    message.info("Password change cancelled.");
-  };
+  const [changePassword] = useChangePasswordMutation();
 
   // Handle save: Validate, trim, and submit form
   const handleSave = async () => {
+    toast.loading("Updating password...", { id: "changePasswordToast" });
+    const values = await form.validateFields();
+    const trimmedValues = {
+      currentPassword: values.currentPassword.trim(),
+      newPassword: values.newPassword.trim(),
+      confirmPassword: values.confirmPassword.trim(),
+    };
+
     try {
-      const values = await form.validateFields();
-      const trimmedValues = {
-        currentPassword: values.currentPassword.trim(),
-        newPassword: values.newPassword.trim(),
-        confirmPassword: values.confirmPassword.trim(),
-      };
-
-      console.log("Password Updated:", trimmedValues);
-
-      // Replace this with an API call to update the password
-      message.success("Password updated successfully!");
-
-      form.resetFields(); // Clear form after successful update
+      const response = await changePassword(trimmedValues).unwrap();
+      if (response.success) {
+        toast.success(response.message, { id: "changePasswordToast" });
+        form.resetFields(); // Clear form after successful update
+      }
     } catch (error) {
+      toast.error(error.data.message || "Something went wrong", {
+        id: "changePasswordToast",
+      });
       console.error("Validation failed:", error);
     }
   };
@@ -138,9 +138,8 @@ function AdminPassword() {
               />
             </Form.Item>
 
-            {/* Buttons: Cancel & Save */}
+            {/* Save button */}
             <Flex justify="flex-end" className="w-[80%] gap-4">
-              <ButtonEDU actionType="cancel" onClick={handleCancel} />
               <ButtonEDU actionType="save" onClick={handleSave} />
             </Flex>
           </Form>
