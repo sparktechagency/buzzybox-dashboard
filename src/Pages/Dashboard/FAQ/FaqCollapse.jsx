@@ -31,12 +31,6 @@ export default function FaqCollapse() {
   const { data } = useGetAllFaqsQuery();
   const faqData = data?.data?.data;
 
-  const [faqs, setFaqs] = useState([
-    { key: "1", question: "What is a dog?" },
-    { key: "2", question: "What is a cat?" },
-    { key: "3", question: "What is a bird?" },
-  ]);
-
   // State for Add/Edit FAQ Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editFaq, setEditFaq] = useState(null);

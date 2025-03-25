@@ -4,14 +4,16 @@ import { LiaPhoneVolumeSolid } from "react-icons/lia";
 import { PiMapPinAreaLight } from "react-icons/pi";
 import { CiMail } from "react-icons/ci";
 import ButtonEDU from "../../../components/common/ButtonEDU";
+import {
+  useGetContactInfoQuery,
+  useUpdateContactInfoMutation,
+} from "../../../redux/features/contact/contactApi";
+import toast from "react-hot-toast";
 
 const Contact = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contactInfo, setContactInfo] = useState({
-    phone: "(+62) 8896-2220 | (021) 111 444 90",
-    email: "demo@gmail.com",
-    location: "Jl. Merdeka Raya No.73B, Kuta, Badung, Bali",
-  });
+  const { data } = useGetContactInfoQuery();
+  const contactInfo = data?.data[0];
 
   const [editedContact, setEditedContact] = useState({ ...contactInfo });
 
@@ -24,26 +26,27 @@ const Contact = () => {
     setIsModalOpen(false);
   };
 
-  const handleUpdate = () => {
-    // Trim everything after the domain part (e.g., ".com", ".org")
-    const trimmedEmail = editedContact.email.replace(
-      /(\.com|\.org|\.net|\.edu)(.*)$/,
-      "$1"
-    );
-
-    // Update the contact info with the trimmed email
-    setContactInfo({ ...editedContact, email: trimmedEmail }); // Update the main contact info
-    setIsModalOpen(false);
+  // handle update contact info
+  const [updateContact] = useUpdateContactInfoMutation();
+  const handleUpdate = async (values) => {
+    toast.loading("Updating...", { id: "contactUpdateToast" });
+    try {
+      const res = await updateContact({ payload: values }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Updated successfully", {
+          id: "contactUpdateToast",
+        });
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update", {
+        id: "contactUpdateToast",
+      });
+    }
   };
 
   const handleChange = (key, value) => {
     setEditedContact((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const validateEmail = (email) => {
-    // Basic email validation regex
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return regex.test(email);
   };
 
   const contactFields = [
@@ -61,17 +64,17 @@ const Contact = () => {
             {
               icon: <LiaPhoneVolumeSolid size={50} />,
               title: "Phone",
-              details: contactInfo.phone,
+              details: contactInfo?.phone,
             },
             {
               icon: <CiMail size={50} />,
               title: "Email",
-              details: contactInfo.email,
+              details: contactInfo?.email,
             },
             {
               icon: <PiMapPinAreaLight size={50} />,
               title: "Location",
-              details: contactInfo.location,
+              details: contactInfo?.location,
             },
           ].map((item, index) => (
             <Flex
@@ -85,8 +88,8 @@ const Contact = () => {
                 {item.icon}
               </div>
               <div className="flex flex-col items-center">
-                <h2 className="text-xl font-semibold">{item.title}</h2>
-                <p className="text-gray-600">{item.details}</p>
+                <h2 className="text-xl font-semibold">{item?.title}</h2>
+                <p className="text-gray-600">{item?.details}</p>
               </div>
             </Flex>
           ))}

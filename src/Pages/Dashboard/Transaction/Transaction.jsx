@@ -1,10 +1,5 @@
 import React, { useState } from "react";
 import { Table, Avatar, ConfigProvider, Input, Button } from "antd";
-import {
-  MoreOutlined,
-  SearchOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
 import { useGetAllTransactionsQuery } from "../../../redux/features/transaction/transactionApi";
 import { maskLongString } from "../../../utils/maskLongString";
 import { imageUrl } from "../../../redux/api/baseApi";

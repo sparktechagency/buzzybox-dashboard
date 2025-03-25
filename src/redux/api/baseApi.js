@@ -23,6 +23,7 @@ export const api = createApi({
     "Transaction",
     "PrivacyPolicy",
     "Faq",
+    "Contact",
   ],
   endpoints: () => ({}),
 });
