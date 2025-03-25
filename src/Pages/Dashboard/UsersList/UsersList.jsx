@@ -6,24 +6,31 @@ import {
   SearchOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import { useGetAllUsersQuery } from "../../../redux/apiSlices/userSlice";
 
 function UsersList() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Track selected rows
-  const [userData, setUserData] = useState(data); // Store user data
+  const { data } = useGetAllUsersQuery({
+    page,
+    searchTerm: searchQuery,
+  });
+  const userData = data?.data?.data;
+
+  // format user data for table
+  const formatedUsersData = userData?.map((item, index) => ({
+    key: item?._id,
+    username: item?.user?.name,
+    email: item?.user?.email,
+    phone: item?.user?.contact,
+    giftsent: item?.totalGiftCards,
+  }));
 
   // Handle Search
   const handleSearch = (value) => {
     setSearchQuery(value);
   };
-
-  // Filter data based on search query
-  const filteredData = userData.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone.includes(searchQuery)
-  );
 
   // Handle row selection
   const rowSelection = {
@@ -32,8 +39,9 @@ function UsersList() {
   };
 
   // Delete selected users
+  // const [] = delete
+
   const handleDeleteSelected = () => {
-    setUserData(userData.filter((user) => !selectedRowKeys.includes(user.key)));
     setSelectedRowKeys([]); // Reset selection
   };
 
@@ -58,7 +66,7 @@ function UsersList() {
         <h1 className="text-[20px] font-medium">User List</h1>
         <div className="flex gap-3">
           <Input
-            placeholder="Search by Name, Email or Phone"
+            placeholder="Search by name or email"
             onChange={(e) => handleSearch(e.target.value)}
             prefix={<SearchOutlined />}
             style={{ width: 200, height: 45 }}
@@ -92,12 +100,13 @@ function UsersList() {
       <Table
         rowSelection={rowSelection}
         columns={columns}
-        dataSource={filteredData}
+        dataSource={formatedUsersData}
         className="px-10"
         pagination={{
           pageSizeOptions: [5, 10, 15, 20],
           defaultPageSize: 5,
           position: ["bottomCenter"],
+          onChange: (page) => setPage(page),
         }}
       />
     </ConfigProvider>
@@ -140,92 +149,5 @@ const columns = [
   {
     key: "action",
     render: () => <MoreOutlined className="cursor-pointer w-10 h-10" />,
-  },
-];
-
-const data = [
-  {
-    key: 1,
-    username: "John Doe",
-    email: "test@gmail.com",
-    phone: "+1234567890",
-    giftsent: 32,
-  },
-  {
-    key: 2,
-    username: "Jane Smith",
-    email: "test2@gmail.com",
-    phone: "+1234567891",
-    giftsent: 32,
-  },
-  {
-    key: 3,
-    username: "Mark Johnson",
-    email: "test3@ymail.com",
-    phone: "+1234567892",
-    giftsent: 32,
-  },
-  {
-    key: 4,
-    username: "Alice Brown",
-    email: "alice@gmail.com",
-    phone: "+1234567893",
-    giftsent: 15,
-  },
-  {
-    key: 5,
-    username: "John Doe",
-    email: "test@gmail.com",
-    phone: "+1234567890",
-    giftsent: 32,
-  },
-  {
-    key: 6,
-    username: "Jane Smith",
-    email: "test2@gmail.com",
-    phone: "+1234567891",
-    giftsent: 32,
-  },
-  {
-    key: 7,
-    username: "Mark Johnson",
-    email: "test3@ymail.com",
-    phone: "+1234567892",
-    giftsent: 32,
-  },
-  {
-    key: 8,
-    username: "Alice Brown",
-    email: "alice@gmail.com",
-    phone: "+1234567893",
-    giftsent: 15,
-  },
-  {
-    key: 9,
-    username: "John Doe",
-    email: "test@gmail.com",
-    phone: "+1234567890",
-    giftsent: 32,
-  },
-  {
-    key: 10,
-    username: "Jane Smith",
-    email: "test2@gmail.com",
-    phone: "+1234567891",
-    giftsent: 32,
-  },
-  {
-    key: 11,
-    username: "Mark Johnson",
-    email: "test3@ymail.com",
-    phone: "+1234567892",
-    giftsent: 32,
-  },
-  {
-    key: 12,
-    username: "Alice Brown",
-    email: "alice@gmail.com",
-    phone: "+1234567893",
-    giftsent: 15,
   },
 ];

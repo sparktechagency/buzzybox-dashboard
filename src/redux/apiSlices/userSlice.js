@@ -1,24 +1,20 @@
 import { api } from "../api/baseApi";
 
 const userSlice = api.injectEndpoints({
-    endpoints: (builder)=>({
-        users: builder.query({
-            query: ({page, search})=> {
-                const params = new URLSearchParams();
-                if(page) params.append("page", page)
-                if(search)params.append("search", search)
-                return{
-                    url: `/auth/get-all-user?${params.toString()}`,
-                    method: "GET",
-                    headers:{
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`
-                    }
-                }
-            }
-        }),
-    })
-})
+  endpoints: (builder) => ({
+    getAllUsers: builder.query({
+      query: ({ page, searchTerm }) => {
+        const params = new URLSearchParams();
+        if (page) params.append("page", page);
+        if (searchTerm) params.append("searchTerm", searchTerm);
+        console.log(params);
+        return {
+          url: `/gift-cards/count-gift-cards?${params.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
+  }),
+});
 
-export const {
-    useUsersQuery
-} = userSlice;
+export const { useGetAllUsersQuery } = userSlice;
