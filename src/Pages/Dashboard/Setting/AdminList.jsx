@@ -9,21 +9,21 @@ import {
   Modal,
   Form,
   ConfigProvider,
-  message,
 } from "antd";
 import { MoreOutlined, DeleteFilled, EditFilled } from "@ant-design/icons";
 
 import ButtonEDU from "../../../components/common/ButtonEDU";
 import {
   useCreateAdminMutation,
+  useDeleteAdminMutation,
   useGetAllAdminsQuery,
+  useUpdateAdminMutation,
 } from "../../../redux/features/admin/adminApi";
 import toast from "react-hot-toast";
 
 const AdminList = () => {
-  const { data, isLoading } = useGetAllAdminsQuery();
+  const { data, isLoading, refetch } = useGetAllAdminsQuery();
   const adminsData = data?.data?.data;
-  const meta = data?.data?.meta;
 
   // format admins data with adding Key property
   useEffect(() => {
@@ -45,7 +45,8 @@ const AdminList = () => {
 
   const [selectedAdmin, setSelectedAdmin] = useState(null);
 
-  const [form] = Form.useForm();
+  const [addAdminForm] = Form.useForm();
+  const [editAdminForm] = Form.useForm();
   const addFormRef = useRef(null);
   const editFormRef = useRef(null);
 
@@ -72,33 +73,33 @@ const AdminList = () => {
   const handleCancelAdd = () => {
     setIsAddModalOpen(false);
     addFormRef.current?.resetFields();
-    message.info("Admin addition cancelled.");
   };
 
   const [addAdmin] = useCreateAdminMutation();
 
+  // handle add admin
   const handleAddAdmin = async () => {
     toast.loading("Adding...", { id: "addAdminToast" });
-    const values = await form.validateFields();
-    // Ensure characters after ".com" are removed
+    const values = await addAdminForm.validateFields();
     const cleanEmail = values.email.replace(/\.com.*/i, ".com");
 
     const newAdmin = {
       key: admins.length + 1,
       ...values,
-      email: cleanEmail, // Apply cleaned email
+      email: cleanEmail,
       role: "Admin",
     };
 
     try {
       const res = await addAdmin({ payload: newAdmin }).unwrap();
-      console.log(res);
       if (res.success) {
         toast.success(res.message || "Added successfully", {
           id: "addAdminToast",
         });
+        refetch();
         setIsAddModalOpen(false);
         addFormRef.current?.resetFields();
+        window.location.reload();
       }
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong", {
@@ -120,23 +121,30 @@ const AdminList = () => {
   const handleCancelEdit = () => {
     setIsEditModalOpen(false);
     editFormRef.current?.resetFields();
-    message.info("Admin edit cancelled.");
   };
 
-  const handleEditAdmin = (values) => {
-    // Ensure characters after ".com" are removed
-    const cleanEmail = values.email.replace(/\.com.*/i, ".com");
+  const [updateAdmin] = useUpdateAdminMutation();
 
-    const updatedAdmins = admins.map((admin) =>
-      admin.key === selectedAdmin.key
-        ? { ...admin, ...values, email: cleanEmail }
-        : admin
-    );
-    setAdmins(updatedAdmins);
-    setFilteredData(updatedAdmins);
-    setIsEditModalOpen(false);
+  // handle edit admin
+  const handleEditAdmin = async (item) => {
+    toast.loading("Updating...", { id: "editAdminToast" });
+    const values = await editAdminForm.validateFields();
 
-    message.success("Admin updated successfully!");
+    try {
+      const res = await updateAdmin({ payload: values, id: item._id }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Updated successfully", {
+          id: "editAdminToast",
+        });
+        setIsEditModalOpen(false);
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong", {
+        id: "editAdminToast",
+      });
+      console.log(error?.data);
+    }
   };
 
   // Open Delete Admin Modal
@@ -145,17 +153,27 @@ const AdminList = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // Confirm Delete Admin
-  const handleConfirmDelete = () => {
-    if (!selectedAdmin) return;
-    const updatedAdmins = admins.filter(
-      (admin) => admin.key !== selectedAdmin.key
-    );
-    setAdmins(updatedAdmins);
-    setFilteredData(updatedAdmins);
-    setIsDeleteModalOpen(false);
+  const [deleteAdmin] = useDeleteAdminMutation();
 
-    message.success("Admin deleted successfully!");
+  // Confirm Delete Admin
+  const handleConfirmDelete = async () => {
+    toast.loading("Deleting...", { id: "deleteAdminToast" });
+    if (!selectedAdmin) return;
+
+    try {
+      const res = await deleteAdmin({ id: selectedAdmin._id }).unwrap();
+      if (res.success) {
+        toast.success("Deleted successfully", { id: "deleteAdminToast" });
+        refetch();
+        setIsDeleteModalOpen(false);
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete", {
+        id: "deleteAdminToast",
+      });
+      console.log(error?.data);
+    }
   };
 
   return (
@@ -188,7 +206,7 @@ const AdminList = () => {
             },
           }}
         >
-          <Form form={form} layout="vertical" ref={addFormRef}>
+          <Form form={addAdminForm} layout="vertical" ref={addFormRef}>
             <Form.Item
               label="Name"
               name="name"
@@ -257,7 +275,7 @@ const AdminList = () => {
             },
           }}
         >
-          <Form layout="vertical" ref={editFormRef} onFinish={handleEditAdmin}>
+          <Form form={editAdminForm} layout="vertical" ref={editFormRef}>
             <Form.Item
               label="Name"
               name="name"
@@ -304,7 +322,7 @@ const AdminList = () => {
               <ButtonEDU actionType="cancel" onClick={handleCancelEdit} />
               <ButtonEDU
                 actionType="save"
-                onClick={() => editFormRef.current?.submit()}
+                onClick={() => handleEditAdmin(selectedAdmin)}
               />
             </div>
           </Form>
