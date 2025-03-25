@@ -1,11 +1,21 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import JoditEditor from "jodit-react";
+import {
+  useCreatePrivacyPolicyMutation,
+  useGetPrivacyPolicyQuery,
+} from "../../../redux/apiSlices/privacyPolicySlice";
+import toast from "react-hot-toast";
 
 function PrivacyPolicy() {
   const editor = useRef(null);
-  const [content, setContent] = useState(
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium totam voluptates blanditiis dicta facilis..."
-  );
+  const { data, isLoading } = useGetPrivacyPolicyQuery();
+  const contentData = data?.content;
+
+  const [content, setContent] = useState(contentData);
+
+  useEffect(() => {
+    setContent(contentData);
+  }, [isLoading]);
 
   const config = useMemo(
     () => ({
@@ -61,8 +71,24 @@ function PrivacyPolicy() {
     []
   );
 
-  const handleSave = () => {
-    console.log("Saved Content:", content);
+  // handle update content
+  const [updateContent] = useCreatePrivacyPolicyMutation();
+
+  const handleSave = async () => {
+    toast.loading("Updating...", { id: "updatePrivacyPolicyToast" });
+    try {
+      const res = await updateContent({ payload: { content } }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Updated successfully", {
+          id: "updatePrivacyPolicyToast",
+        });
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update", {
+        id: "updatePrivacyPolicyToast",
+      });
+      console.log(error?.data);
+    }
   };
 
   return (

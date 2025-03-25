@@ -1,11 +1,21 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import JoditEditor from "jodit-react";
+import {
+  useCreateTermsAndConditionsMutation,
+  useGetTermsAndConditionQuery,
+} from "../../../redux/apiSlices/termsAndConditionSlice";
+import toast from "react-hot-toast";
 
 function TermsAndCondition() {
   const editor = useRef(null);
-  const [content, setContent] = useState(
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium totam voluptates blanditiis dicta facilis..."
-  );
+  const { data, isLoading } = useGetTermsAndConditionQuery();
+  const contentData = data?.content;
+
+  const [content, setContent] = useState(contentData);
+
+  useEffect(() => {
+    setContent(contentData);
+  }, [isLoading]);
 
   const config = useMemo(
     () => ({
@@ -61,8 +71,24 @@ function TermsAndCondition() {
     []
   );
 
-  const handleSave = () => {
-    console.log("Saved Content:", content);
+  // handle update content
+  const [updateContent] = useCreateTermsAndConditionsMutation();
+
+  const handleSave = async () => {
+    toast.loading("Updating...", { id: "updateTermsConditionToast" });
+    try {
+      const res = await updateContent({ payload: { content } }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Updated successfully", {
+          id: "updateTermsConditionToast",
+        });
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update", {
+        id: "updateTermsConditionToast",
+      });
+      console.log(error?.data);
+    }
   };
 
   return (
