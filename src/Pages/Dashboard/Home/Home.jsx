@@ -1,20 +1,11 @@
 import React, { useState } from "react";
-import { FaUserGroup } from "react-icons/fa6";
-import LineCharts from "./LineCharts";
-import BarCharts from "./BarCharts";
 import AreaCharts from "./AreaCharts";
-import { GoDotFill } from "react-icons/go";
 import Filter from "./Filter";
-import { TbUsersGroup } from "react-icons/tb";
-import { RiMoneyDollarCircleLine } from "react-icons/ri";
-import { ImBooks } from "react-icons/im";
-import { Flex, Space, Select } from "antd";
+import { Flex, Space } from "antd";
 import { UserOutlined, GiftOutlined, DollarOutlined } from "@ant-design/icons";
-import growth from "../../../assets/gtdandy/growth.png";
 import UserStatistics from "./UserStatistics";
 import TotalGifts from "./TotalGifts";
 import TinyAreaChart from "./TinyAreaChart";
-import { DatePicker } from "antd";
 import { useGetStatsQuery } from "../../../redux/apiSlices/homeSlice";
 
 const Card = ({ item }) => {

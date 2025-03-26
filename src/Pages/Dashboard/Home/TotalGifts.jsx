@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -10,25 +10,30 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { WeeklyReport } from "./Filter";
+import Filter from "./Filter";
+import { useGetMonthlyGiftsQuery } from "../../../redux/apiSlices/homeSlice";
 
 export default function TotalGifts() {
-  const data = [
-    { name: "Mo", pv: 2400, amt: 2400 },
-    { name: "Tu", pv: 1398, amt: 2210 },
-    { name: "We", pv: 9800, amt: 2290 },
-    { name: "Th", pv: 3908, amt: 2000 },
-    { name: "Fr", pv: 4800, amt: 2181 },
-    { name: "St", pv: 3800, amt: 2500 },
-    { name: "Su", pv: 4300, amt: 2100 },
-  ];
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [giftsData, setGiftsData] = useState([]);
+  const { data, isLoading } = useGetMonthlyGiftsQuery({ year });
+
+  useEffect(() => {
+    if (data) {
+      const formatedData = Object.entries(data?.data).map(([name, pv]) => ({
+        name,
+        pv,
+      }));
+      setGiftsData(formatedData);
+    }
+  }, [isLoading, year]);
 
   return (
     <div className="w-1/2 h-[300px] bg-white p-4 rounded-md mt-4 relative shadow-md">
       <h2 className="text-lg font-medium mb-4 ml-4">Total Gift Sent</h2>
       <ResponsiveContainer width="100%" height={250}>
         <LineChart
-          data={data}
+          data={giftsData}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid
@@ -49,7 +54,12 @@ export default function TotalGifts() {
           />
         </LineChart>
       </ResponsiveContainer>
-      <WeeklyReport />
+      <Filter
+        className="absolute"
+        picker="year"
+        placeholder={new Date().getFullYear()}
+        setValue={setYear}
+      />
     </div>
   );
 }

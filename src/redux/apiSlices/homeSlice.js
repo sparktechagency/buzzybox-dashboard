@@ -29,7 +29,7 @@ const homeSlice = api.injectEndpoints({
     getMonthlyGifts: builder.query({
       query: ({ year }) => {
         return {
-          url: `/analysis/monthly-users?year=${year}`,
+          url: `/analysis/monthly-total-gift-send?year=${year}`,
           method: "GET",
         };
       },
