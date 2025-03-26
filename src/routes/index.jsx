@@ -48,11 +48,6 @@ const router = createBrowserRouter([
         element: <Category />,
       },
       {
-        path: "/slider",
-        element: <Slider />,
-      },
-
-      {
         path: "/faq",
         element: <FaqCollapse />,
       },

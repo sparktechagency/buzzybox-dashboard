@@ -15,7 +15,6 @@ import UserStatistics from "./UserStatistics";
 import TotalGifts from "./TotalGifts";
 import TinyAreaChart from "./TinyAreaChart";
 import { DatePicker } from "antd";
-import dayjs from "dayjs";
 const stats = [
   { label: "Active User", value: "1000", icon: <UserOutlined /> },
   { label: "Card Sent", value: "1200", icon: <GiftOutlined /> },

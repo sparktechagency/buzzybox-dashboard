@@ -14,6 +14,7 @@ import { FiEdit2 } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import {
   useCreateCategoryMutation,
+  useDeleteCategoryMutation,
   useGetCategoriesQuery,
   useUpdateCategoryMutation,
 } from "../../../redux/apiSlices/categorySlice";
@@ -153,8 +154,20 @@ function Category() {
     setIsDeleteModalOpen(true);
   };
 
-  const onConfirmDelete = () => {
-    setIsDeleteModalOpen(false);
+  // handle delete category
+  const [deleteCategory] = useDeleteCategoryMutation();
+  const onConfirmDelete = async () => {
+    toast.loading("Deleting...", { id: "deleteCategoryToast" });
+    try {
+      const res = await deleteCategory({ id: deletingRecord?._id }).unwrap();
+      if (res.success) {
+        toast.success("Deleted successfully", { id: "deleteCategoryToast" });
+        setIsDeleteModalOpen(false);
+      }
+    } catch (error) {
+      toast.error("Failed to delete", { id: "deleteCategoryToast" });
+      console.log(error);
+    }
   };
 
   const onCancelDelete = () => {
