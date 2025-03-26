@@ -24,6 +24,6 @@ export const { saveToAuth, logOut } = authSlice.actions;
 export default authSlice.reducer;
 
 export const selectAuth = (state) => state.auth;
-export const selectAccessToken = (state) => state.auth.accessToken;
+export const selectAccessToken = (state) => state?.auth?.accessToken;
 // export const selectCurrentUser = (state) => state.auth.user;
 // export const selectRefreshToken = (state) => state.auth.refreshToken;

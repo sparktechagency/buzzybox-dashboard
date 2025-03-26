@@ -2,7 +2,7 @@ import React from "react";
 import { imageUrl } from "../../redux/api/baseApi";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
-import { UserOutlined, DownOutlined } from "@ant-design/icons";
+import { DownOutlined } from "@ant-design/icons";
 import { Badge, Space, Flex } from "antd";
 import { Avatar, Dropdown, ConfigProvider } from "antd";
 import { useUser } from "../../provider/User";
@@ -12,9 +12,9 @@ import { logOut } from "../../redux/features/auth/authSlice";
 const Header = () => {
   const dispatch = useDispatch();
   const { user } = useUser();
-  const src = user?.image?.startsWith("https")
-    ? user?.image
-    : `${imageUrl}/${user?.image}`;
+  const src = user?.profile?.startsWith("https")
+    ? user?.profile
+    : `${imageUrl}${user?.profile}`;
 
   const items = [
     {
@@ -52,13 +52,13 @@ const Header = () => {
         {/* Right-side icons and user info */}
         <Flex align="center" gap={20} justify="flex-end">
           {/* Notification Badge */}
-          <div className="w-8 h-8 bg-[#fff9fc] flex items-center justify-center p-5">
+          {/* <div className="w-8 h-8 bg-[#fff9fc] flex items-center justify-center p-5">
             <Link to="/notification" className="h-fit mt-[10px]">
               <Badge dot>
                 <FaRegBell color="#ffc301" size={24} />
               </Badge>
             </Link>
-          </div>
+          </div> */}
 
           {/* User Profile */}
           <Link to="/setting" className="flex items-center gap-3">
@@ -70,7 +70,7 @@ const Header = () => {
             <Dropdown menu={{ items }} trigger={["click"]}>
               <a onClick={(e) => e.preventDefault()}>
                 <Space>
-                  {`${user?.firstName} ${user?.lastName}`}
+                  {`${user?.name}`}
                   <DownOutlined />
                 </Space>
               </a>
