@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaUserGroup } from "react-icons/fa6";
 import LineCharts from "./LineCharts";
 import BarCharts from "./BarCharts";
@@ -15,11 +15,7 @@ import UserStatistics from "./UserStatistics";
 import TotalGifts from "./TotalGifts";
 import TinyAreaChart from "./TinyAreaChart";
 import { DatePicker } from "antd";
-const stats = [
-  { label: "Active User", value: "1000", icon: <UserOutlined /> },
-  { label: "Card Sent", value: "1200", icon: <GiftOutlined /> },
-  { label: "Revenue", value: "$3500", icon: <DollarOutlined /> },
-];
+import { useGetStatsQuery } from "../../../redux/apiSlices/homeSlice";
 
 const Card = ({ item }) => {
   return (
@@ -28,7 +24,7 @@ const Card = ({ item }) => {
         gap={5}
         justify="space-between"
         align="center"
-        className="bg-white rounded-md  w-[30%] h-36 px-8 shadow-md"
+        className="bg-white rounded-md w-full h-36 px-8 shadow-md"
       >
         <Flex
           vertical
@@ -57,29 +53,46 @@ const Card = ({ item }) => {
 };
 
 const Home = () => {
-  const handleChange = (value) => {
-    console.log(`selected ${value}`);
-  };
+  const [earningYear, setEarningYear] = useState(new Date().getFullYear());
+
+  const { data } = useGetStatsQuery();
+  const statsData = data?.data;
+
+  const stats = [
+    {
+      label: "Active User",
+      value: statsData?.totalUsers,
+      icon: <UserOutlined />,
+    },
+    {
+      label: "Card Sent",
+      value: statsData?.totalGiftCards,
+      icon: <GiftOutlined />,
+    },
+    {
+      label: "Revenue",
+      value: `$${statsData?.totalRevenue}`,
+      icon: <DollarOutlined />,
+    },
+  ];
+
   return (
     <div className="px-10">
       <div className="flex flex-col flex-wrap items-end gap-5 justify-between w-full bg-transparent rounded-md relative ">
-        <div className="flex items-center sm:flex-wrap gap-2 w-full ">
-          {stats.map((item, index) => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 items-center justify-between gap-4 w-full ">
+          {stats?.map((item, index) => (
             <Card key={index} item={item} />
           ))}
-
-          <DatePicker
-            className="absolute top-0 right-0 w-32"
-            picker="month"
-            placeholder="Jan"
-            format="MMM YYYY" // Formats as "Dec 2025"
-          />
         </div>
       </div>
       <div className="w-full h-[360px] p-4 bg-white rounded mt-4 relative shadow-md">
         <h2 className="text-lg font-medium mb-2 py-2 px-3">Monthly Earnings</h2>
-        <Filter picker="year" placeholder={new Date().getFullYear()} />
-        <AreaCharts />
+        <Filter
+          picker="year"
+          placeholder={new Date().getFullYear()}
+          setValue={setEarningYear}
+        />
+        <AreaCharts year={earningYear} />
       </div>
 
       <Flex align="center" justify="space-between" gap={20}>

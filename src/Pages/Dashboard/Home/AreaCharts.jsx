@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -8,29 +8,43 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useGetMonthlyEarningsQuery } from "../../../redux/apiSlices/homeSlice";
 
-const data = [
-  { name: "Jan", pv: 2400, amt: 2400 },
-  { name: "Feb", pv: 1398, amt: 2210 },
-  { name: "Mar", pv: 9800, amt: 2290 },
-  { name: "Apr", pv: 3908, amt: 2000 },
-  { name: "May", pv: 4800, amt: 2181 },
-  { name: "Jun", pv: 3800, amt: 2500 },
-  { name: "Jul", pv: 4300, amt: 2100 },
-  { name: "Aug", pv: 3200, amt: 2600 },
-  { name: "Sep", pv: 4500, amt: 2700 },
-  { name: "Oct", pv: 5000, amt: 2800 },
-  { name: "Nov", pv: 5200, amt: 3000 },
-  { name: "Dec", pv: 6000, amt: 3200 },
+const datas = [
+  { name: "Jan", pv: 2400 },
+  { name: "Feb", pv: 1398 },
+  { name: "Mar", pv: 9800 },
+  { name: "Apr", pv: 3908 },
+  { name: "May", pv: 4800 },
+  { name: "Jun", pv: 3800 },
+  { name: "Jul", pv: 4300 },
+  { name: "Aug", pv: 3200 },
+  { name: "Sep", pv: 4500 },
+  { name: "Oct", pv: 5000 },
+  { name: "Nov", pv: 5200 },
+  { name: "Dec", pv: 6000 },
 ];
 
-function AreaCharts() {
+function AreaCharts({ year }) {
+  const { data, isLoading } = useGetMonthlyEarningsQuery({ year });
+  const [earningData, setEarningData] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      const formatedData = Object.entries(data?.data).map(([name, pv]) => ({
+        name,
+        pv,
+      }));
+      setEarningData(formatedData);
+    }
+  }, [isLoading, year]);
+
   return (
     <ResponsiveContainer width="100%" height={265}>
       <AreaChart
         width={1400}
         height={200}
-        data={data}
+        data={earningData}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
         <defs>
@@ -76,7 +90,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         {/* Tooltip Content */}
         <div className="bg-gtdandy p-2 text-white rounded shadow-md ">
           {payload.map((pld, index) => (
-            <div key={index}>{pld.value}K</div>
+            <div key={index}>{pld.value}</div>
           ))}
         </div>
       </div>

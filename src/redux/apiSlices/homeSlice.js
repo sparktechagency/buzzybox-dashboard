@@ -1,21 +1,45 @@
 import { api } from "../api/baseApi";
 
 const homeSlice = api.injectEndpoints({
-    endpoints: (builder)=>({
-        summary: builder.query({
-            query: ()=> {
-                return{
-                    url: `/order`,
-                    method: "GET",
-                    headers:{
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`
-                    }
-                }
-            }
-        }),
-    })
-})
+  endpoints: (builder) => ({
+    getStats: builder.query({
+      query: () => {
+        return {
+          url: `/analysis/stats`,
+          method: "GET",
+        };
+      },
+    }),
+    getMonthlyEarnings: builder.query({
+      query: ({ year }) => {
+        return {
+          url: `/analysis/monthly-earnings?year=${year}`,
+          method: "GET",
+        };
+      },
+    }),
+    getMonthlyUsers: builder.query({
+      query: ({ year }) => {
+        return {
+          url: `/analysis/monthly-users?year=${year}`,
+          method: "GET",
+        };
+      },
+    }),
+    getMonthlyGifts: builder.query({
+      query: ({ year }) => {
+        return {
+          url: `/analysis/monthly-users?year=${year}`,
+          method: "GET",
+        };
+      },
+    }),
+  }),
+});
 
 export const {
-    useSummaryQuery
+  useGetStatsQuery,
+  useGetMonthlyEarningsQuery,
+  useGetMonthlyUsersQuery,
+  useGetMonthlyGiftsQuery,
 } = homeSlice;
