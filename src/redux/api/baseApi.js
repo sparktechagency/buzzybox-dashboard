@@ -24,6 +24,7 @@ export const api = createApi({
     "PrivacyPolicy",
     "Faq",
     "Contact",
+    "Category",
   ],
   endpoints: () => ({}),
 });

@@ -87,20 +87,12 @@ const authSlice = api.injectEndpoints({
       },
     }),
 
-    profile: builder.query({
+    getProfile: builder.query({
       query: () => {
         return {
           method: "GET",
-          url: "/auth/get-profile",
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
+          url: "/users/profile",
         };
-      },
-      transformResponse: ({ user }) => {
-        return user;
       },
     }),
   }),
@@ -114,5 +106,5 @@ export const {
   useResetPasswordMutation,
   useChangePasswordMutation,
   useUpdateProfileMutation,
-  useProfileQuery,
+  useGetProfileQuery,
 } = authSlice;

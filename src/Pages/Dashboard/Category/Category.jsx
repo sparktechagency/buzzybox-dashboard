@@ -7,101 +7,105 @@ import {
   Input,
   Upload,
   message,
-  Button,
 } from "antd";
-import {
-  PlusOutlined,
-  CloudUploadOutlined,
-  CloseCircleOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import ButtonEDU from "../../../components/common/ButtonEDU";
-import gift from "../../../assets/gtdandy/gift.png";
 import { FiEdit2 } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import {
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useGetCategoriesQuery,
+  useUpdateCategoryMutation,
+} from "../../../redux/apiSlices/categorySlice";
+import { imageUrl } from "../../../redux/api/baseApi";
+import { FaTrashCan } from "react-icons/fa6";
+import toast from "react-hot-toast";
 
 function Category() {
+  const { data } = useGetCategoriesQuery();
+  const categories = data?.data;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
-  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadedCategoryImage, setUploadedCategoryImage] = useState(null);
+  const [uploadedOccasionImage, setUploadedOccasionImage] = useState(null);
   const [editingKey, setEditingKey] = useState(null);
-  const [tableData, setTableData] = useState([
-    { key: "1", name: "John Brown", serial: 1, sliderimg: gift },
-    { key: "2", name: "Jim Green", serial: 2, sliderimg: gift },
-    { key: "3", name: "Joe Black", serial: 3, sliderimg: gift },
-    {
-      key: "4",
-      serial: 4,
-      sliderimg: gift,
-      name: "Mountain Escape",
-    },
-    {
-      key: "5",
-      serial: 5,
-      sliderimg: gift,
-      name: "Sunset Glow",
-    },
-    {
-      key: "6",
-      serial: 6,
-      sliderimg: gift,
-      name: "City Lights",
-    },
-  ]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingRecord, setDeletingRecord] = useState(null);
 
   const showModal = () => {
     setIsEditing(false);
+    form.setFieldsValue(null);
+    setUploadedOccasionImage(null);
     setIsModalOpen(true);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
     form.resetFields();
-    setUploadedImage(null);
+    setUploadedCategoryImage(null);
     setEditingKey(null);
   };
 
-  const handleFormSubmit = (values) => {
-    if (!uploadedImage && !isEditing) {
+  // handle add or edit form
+  const [addCategory] = useCreateCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
+
+  const handleFormSubmit = async (values) => {
+    if (!uploadedCategoryImage && !isEditing) {
       message.error("Please upload an image!");
       return;
     }
 
-    if (isEditing) {
-      // Update existing row
-      const updatedData = tableData.map((item) =>
-        item.key === editingKey
-          ? {
-              ...item,
-              name: values.name,
-              sliderimg: uploadedImage || item.sliderimg,
-            }
-          : item
+    const formData = new FormData();
+    if (values.name) formData.append("name", values.name);
+    if (values.categoryImage?.file?.originFileObj)
+      formData.append(
+        "categoryImage",
+        values.categoryImage?.file?.originFileObj
       );
-      setTableData(updatedData);
-      message.success("Slider updated successfully!");
-    } else {
-      // Add new row
-      setTableData([
-        ...tableData,
-        {
-          key: (tableData.length + 1).toString(),
-          name: values.name,
-          serial: tableData.length + 1,
-          sliderimg: uploadedImage,
-        },
-      ]);
-      message.success("Slider added successfully!");
-    }
+    if (values.occasionImage?.file?.originFileObj)
+      formData.append(
+        "occasionImage",
+        values.occasionImage?.file?.originFileObj
+      );
 
-    handleCancel();
+    if (isEditing) {
+      // Update existing category
+      toast.loading("Updating...", { id: "updateCategoryToast" });
+      try {
+        const res = await updateCategory({
+          payload: formData,
+          id: editingKey,
+        }).unwrap();
+        if (res.success) {
+          toast.success("Updated successfully", { id: "updateCategoryToast" });
+          handleCancel();
+        }
+      } catch (error) {
+        toast.error("Failed to update", { id: "updateCategoryToast" });
+        console.log(error);
+      }
+    } else {
+      // Add new category
+      toast.loading("Adding...", { id: "updateCategoryToast" });
+      try {
+        const res = await addCategory({ payload: formData }).unwrap();
+        if (res.success) {
+          toast.success("Added successfully", { id: "updateCategoryToast" });
+          handleCancel();
+        }
+      } catch (error) {
+        toast.error("Failed to add", { id: "updateCategoryToast" });
+        console.log(error);
+      }
+    }
   };
 
-  const handleImageUpload = (info) => {
+  // handle category image upload
+  const handleCategoryImageUpload = (info) => {
     const file = info.file.originFileObj;
     if (!file) return;
 
@@ -113,34 +117,72 @@ function Category() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      setUploadedImage(reader.result);
+      setUploadedCategoryImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // handle occasion image upload
+  const handleOccasionImageUpload = (info) => {
+    const file = info.file.originFileObj;
+    if (!file) return;
+
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("You can only upload image files!");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setUploadedOccasionImage(reader.result);
     };
     reader.readAsDataURL(file);
   };
 
   const handleEdit = (record) => {
     setIsEditing(true);
-    setEditingKey(record.key);
-    setUploadedImage(record.sliderimg);
-    form.setFieldsValue({ name: record.name });
+    setEditingKey(record?._id);
+    setUploadedCategoryImage(record?.categoryImage);
+    setUploadedOccasionImage(record?.occasionImage);
+    form.setFieldsValue(record);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (key, name) => {
-    setDeletingRecord({ key, name });
+  const handleDelete = (record) => {
+    setDeletingRecord(record);
     setIsDeleteModalOpen(true);
   };
 
-  const onConfirmDelete = () => {
-    setTableData(tableData.filter((item) => item.key !== deletingRecord.key));
-    message.success("Slider deleted successfully!");
-    setIsDeleteModalOpen(false);
+  // handle delete category
+  const [deleteCategory] = useDeleteCategoryMutation();
+  const onConfirmDelete = async () => {
+    toast.loading("Deleting...", { id: "deleteCategoryToast" });
+    try {
+      const res = await deleteCategory({ id: deletingRecord?._id }).unwrap();
+      if (res.success) {
+        toast.success("Deleted successfully", { id: "deleteCategoryToast" });
+        setIsDeleteModalOpen(false);
+      }
+    } catch (error) {
+      toast.error("Failed to delete", { id: "deleteCategoryToast" });
+      console.log(error);
+    }
   };
 
   const onCancelDelete = () => {
-    message.info("Delete action canceled.");
     setIsDeleteModalOpen(false);
   };
+
+  // format data for table
+  const formatedCategoriesData = categories?.map((item, index) => ({
+    _id: item?._id,
+    key: index + 1,
+    serial: index + 1,
+    name: item?.name,
+    categoryImage: item?.categoryImage,
+    occasionImage: item?.occasionImage,
+  }));
 
   const columns = [
     {
@@ -154,10 +196,12 @@ function Category() {
       ),
     },
     {
-      title: "Slider Image",
-      dataIndex: "sliderimg",
-      key: "sliderimg",
-      render: (sliderimg) => <img width={60} src={sliderimg} alt="slider" />,
+      title: "Category Image",
+      dataIndex: "categoryImage",
+      key: "categoryImage",
+      render: (categoryImage) => (
+        <img width={60} src={`${imageUrl}${categoryImage}`} alt="slider" />
+      ),
     },
     {
       title: "Name",
@@ -177,7 +221,7 @@ function Category() {
           <RiDeleteBin6Line
             style={{ fontSize: 24 }}
             className="text-black hover:text-red-500 cursor-pointer"
-            onClick={() => handleDelete(record.key, record.name)}
+            onClick={() => handleDelete(record)}
           />
         </div>
       ),
@@ -216,10 +260,10 @@ function Category() {
       >
         <Table
           columns={columns}
-          dataSource={tableData}
+          dataSource={formatedCategoriesData}
           pagination={{
             pageSizeOptions: [5, 10, 15, 20],
-            defaultPageSize: 5,
+            defaultPageSize: 8,
             position: ["bottomCenter"],
           }}
         />
@@ -271,28 +315,86 @@ function Category() {
               <Input placeholder="Enter slider name" className="h-12" />
             </Form.Item>
 
-            <Form.Item label="Upload Image">
-              {uploadedImage ? (
-                <div className="relative">
-                  <img src={uploadedImage} alt="Uploaded" width={100} />
-                  <CloseCircleOutlined
-                    className="absolute top-0 right-0 text-red-500 cursor-pointer"
-                    onClick={() => setUploadedImage(null)}
-                  />
-                </div>
-              ) : (
-                <Upload
-                  name="image"
-                  listType="picture-card"
-                  showUploadList={false}
-                  onChange={handleImageUpload}
-                >
+            {/* category image field */}
+            <Form.Item
+              label="Category Image"
+              name="categoryImage"
+              rules={[
+                { required: true, message: "Please upload category image" },
+              ]}
+            >
+              <Upload
+                name="image"
+                accept="image/png, image/jpeg"
+                maxCount={1}
+                listType="picture-card"
+                showUploadList={false}
+                onChange={handleCategoryImageUpload}
+              >
+                {uploadedCategoryImage ? (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={
+                        uploadedCategoryImage.includes("base64")
+                          ? uploadedCategoryImage
+                          : `${imageUrl}${uploadedCategoryImage}`
+                      }
+                      alt="Uploaded"
+                      className="w-full h-full object-cover"
+                    />
+                    <FaTrashCan
+                      className="text-xl absolute top-1 right-1 text-red-500 hover:text-stone-800 cursor-pointer"
+                      onClick={() => setUploadedCategoryImage(null)}
+                    />
+                  </div>
+                ) : (
                   <button style={{ border: 0, background: "none" }}>
                     <CloudUploadOutlined style={{ fontSize: 24 }} />
                     <div>Upload</div>
                   </button>
-                </Upload>
-              )}
+                )}
+              </Upload>
+            </Form.Item>
+
+            {/* occasion image field */}
+            <Form.Item
+              label="Occasion Image"
+              name="occasionImage"
+              rules={[
+                { required: true, message: "Please upload occasion image" },
+              ]}
+            >
+              <Upload
+                name="image"
+                accept="image/png, image/jpeg"
+                maxCount={1}
+                listType="picture-card"
+                showUploadList={false}
+                onChange={handleOccasionImageUpload}
+              >
+                {uploadedOccasionImage ? (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={
+                        uploadedOccasionImage.includes("base64")
+                          ? uploadedOccasionImage
+                          : `${imageUrl}${uploadedOccasionImage}`
+                      }
+                      alt="Uploaded"
+                      className="w-full h-full object-cover"
+                    />
+                    <FaTrashCan
+                      className="text-xl absolute top-1 right-1 text-red-500 hover:text-stone-800 cursor-pointer"
+                      onClick={() => setUploadedOccasionImage(null)}
+                    />
+                  </div>
+                ) : (
+                  <button style={{ border: 0, background: "none" }}>
+                    <CloudUploadOutlined style={{ fontSize: 24 }} />
+                    <div>Upload</div>
+                  </button>
+                )}
+              </Upload>
             </Form.Item>
 
             <div className="flex justify-end">

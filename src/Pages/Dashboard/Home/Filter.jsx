@@ -1,11 +1,15 @@
 import React from "react";
-import { Select, Space, ConfigProvider, DatePicker } from "antd";
+import { Select, ConfigProvider, DatePicker } from "antd";
 
 const handleChange = (value) => {
   console.log(`selected ${value}`);
 };
 
-export default function Filter({ picker, placeholder }) {
+export default function Filter({ picker, placeholder, setValue }) {
+  const handleYearChange = (value) => {
+    setValue(value?.$y);
+  };
+
   return (
     <ConfigProvider
       theme={{
@@ -21,6 +25,7 @@ export default function Filter({ picker, placeholder }) {
           className="absolute"
           picker={picker}
           placeholder={placeholder}
+          onChange={handleYearChange}
         />
       </div>
     </ConfigProvider>

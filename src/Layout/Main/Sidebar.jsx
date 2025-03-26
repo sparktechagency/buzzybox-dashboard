@@ -49,7 +49,7 @@ const Sidebar = () => {
     {
       key: "/userlist",
       icon: <AiOutlineUser size={24} />,
-      label: <Link to="/userlist">UserList</Link>,
+      label: <Link to="/userlist">User List</Link>,
     },
     // {
     //   key: "/earnings",
@@ -64,7 +64,7 @@ const Sidebar = () => {
     {
       key: "/transaction",
       icon: <PiWallet size={24} />,
-      label: <Link to="/transaction">Transaction</Link>,
+      label: <Link to="/transaction">Transactions</Link>,
     },
     // {
     //   key: "/blogs",
@@ -111,7 +111,7 @@ const Sidebar = () => {
     {
       key: "subMenuSetting",
       icon: <PiCirclesThreePlusLight size={24} />,
-      label: "Cms",
+      label: "CMS",
       children: [
         // {
         //   key: "/banner",
@@ -129,14 +129,14 @@ const Sidebar = () => {
         //     </Link>
         //   ),
         // },
-        {
-          key: "/slider",
-          label: (
-            <Link to="/slider" className="text-white hover:text-white">
-              Slider
-            </Link>
-          ),
-        },
+        // {
+        //   key: "/slider",
+        //   label: (
+        //     <Link to="/slider" className="text-white hover:text-white">
+        //       Slider
+        //     </Link>
+        //   ),
+        // },
         {
           key: "/category",
           label: (
@@ -194,7 +194,7 @@ const Sidebar = () => {
     {
       key: "/setting",
       icon: <RiSettings5Line size={24} />,
-      label: <Link to="/setting">Setting</Link>,
+      label: <Link to="/setting">Settings</Link>,
     },
     {
       key: "/logout",
