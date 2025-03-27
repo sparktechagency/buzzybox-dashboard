@@ -31,10 +31,6 @@ const authSlice = api.injectEndpoints({
       transformResponse: (data) => {
         return data;
       },
-      transformErrorResponse: ({ data }) => {
-        const { message } = data;
-        return message;
-      },
     }),
     forgotPassword: builder.mutation({
       query: (data) => {
@@ -94,6 +90,7 @@ const authSlice = api.injectEndpoints({
           url: "/users/profile",
         };
       },
+      keepUnusedDataFor: 0, // Disable caching
     }),
   }),
 });
