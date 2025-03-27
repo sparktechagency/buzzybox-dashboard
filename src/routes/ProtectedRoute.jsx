@@ -1,10 +1,20 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useGetProfileQuery } from "../redux/apiSlices/authSlice";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { logOut } from "../redux/features/auth/authSlice";
 
 const PrivateRoute = ({ children }) => {
   const location = useLocation();
-  const { data, isLoading, isError, isFetching } = useGetProfileQuery();
+  const dispatch = useDispatch();
+
+  const { data, isLoading, isError, isFetching } = useGetProfileQuery(
+    undefined,
+    {
+      refetchOnMountOrArgChange: true, // Disable caching by refetching on mount
+    }
+  );
   const profile = data?.data;
 
   if (isLoading || isFetching) {
@@ -12,7 +22,7 @@ const PrivateRoute = ({ children }) => {
   }
 
   if (isError) {
-    return <Navigate to="/auth/login" state={{ from: location }} />;
+    return <Navigate to="/auth/login" />;
   }
 
   if (
@@ -22,6 +32,8 @@ const PrivateRoute = ({ children }) => {
     return children;
   }
 
+  toast.error("You are not authorized");
+  dispatch(logOut());
   return <Navigate to="/auth/login" state={{ from: location }} />;
 };
 
