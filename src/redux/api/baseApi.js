@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://10.0.60.123:5001/api/v1",
+    baseUrl: import.meta.env.VITE_API_URL,
     credentials: "include",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.accessToken;
@@ -29,4 +29,4 @@ export const api = createApi({
   endpoints: () => ({}),
 });
 
-export const imageUrl = "http://10.0.60.123:5001";
+export const imageUrl = import.meta.env.VITE_SERVER_URL;

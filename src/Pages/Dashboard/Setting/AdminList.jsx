@@ -143,7 +143,7 @@ const AdminList = () => {
       toast.error(error?.data?.message || "Something went wrong", {
         id: "editAdminToast",
       });
-      console.log(error?.data);
+      console.error(error?.data);
     }
   };
 
@@ -172,7 +172,7 @@ const AdminList = () => {
       toast.error(error?.data?.message || "Failed to delete", {
         id: "deleteAdminToast",
       });
-      console.log(error?.data);
+      console.error(error?.data);
     }
   };
 

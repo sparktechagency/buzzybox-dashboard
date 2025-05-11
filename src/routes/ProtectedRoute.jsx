@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { ImSpinner9 } from "react-icons/im";
 import { useGetProfileQuery } from "../redux/apiSlices/authSlice";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -18,7 +19,13 @@ const PrivateRoute = ({ children }) => {
   const profile = data?.data;
 
   if (isLoading || isFetching) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <h1 className="flex items-center gap-4">
+          <ImSpinner9 className="animate-spin size-7" />
+        </h1>
+      </div>
+    );
   }
 
   if (isError) {
@@ -30,10 +37,11 @@ const PrivateRoute = ({ children }) => {
     (profile?.role === "ADMIN" || profile?.role === "SUPER_ADMIN")
   ) {
     return children;
+  } else {
+    toast.error("You are not authorized");
+    dispatch(logOut());
   }
 
-  toast.error("You are not authorized");
-  dispatch(logOut());
   return <Navigate to="/auth/login" state={{ from: location }} />;
 };
 

@@ -18,13 +18,15 @@ const Login = () => {
       const response = await login(values).unwrap();
 
       if (response.success) {
-        toast.success("Login Successful", { id: "loginToast" });
+        toast.dismiss('loginToast')
         const accessToken = response?.data?.accessToken;
         dispatch(saveToAuth({ data: { accessToken } }));
         navigate("/");
       }
     } catch (error) {
-      toast.error(error || "Something went wrong", { id: "loginToast" });
+      toast.error(error?.data?.message || "Something went wrong", {
+        id: "loginToast",
+      });
       console.log(error);
     }
   };
