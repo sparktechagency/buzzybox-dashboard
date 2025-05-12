@@ -1,37 +1,75 @@
 import { api } from "../api/baseApi";
 
 const aboutUsSlice = api.injectEndpoints({
-    endpoints: (builder)=>({
-        updateAboutUs: builder.mutation({
-            query: ({id, description})=> {
-                return{
-                    url: `/about/update-about/${id}`,
-                    method: "PATCH",
-                    body: {description},
-                    headers:{
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`
-                    }
-                }
-            }
-        }),
-        aboutUs: builder.query({
-            query: ()=> {
-                return{
-                    url: "/about/get-about",
-                    method: "GET",
-                    headers:{
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`
-                    }
-                }
-            },
-            transformResponse: ({data})=>{
-                return data
-            }
-        }),
-    })
-})
+  endpoints: (builder) => ({
+    createAboutUs: builder.mutation({
+      query: ({ payload }) => {
+        return {
+          url: `/about/create-about`,
+          method: "POST",
+          body: payload,
+          headers: {
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("token")
+            )}`,
+          },
+        };
+      },
+      invalidatesTags: ["About"],
+    }),
+    updateAboutUs: builder.mutation({
+      query: ({ id, payload }) => {
+        return {
+          url: `/about/${id}`,
+          method: "PATCH",
+          body: payload,
+          headers: {
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("token")
+            )}`,
+          },
+        };
+      },
+      invalidatesTags: ["About"],
+    }),
+    deleteAboutUs: builder.mutation({
+      query: ({ id, payload }) => {
+        return {
+          url: `/about/${id}`,
+          method: "DELETE",
+          body: payload,
+          headers: {
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("token")
+            )}`,
+          },
+        };
+      },
+      invalidatesTags: ["About"],
+    }),
+    getAboutUs: builder.query({
+      query: () => {
+        return {
+          url: "/about",
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("token")
+            )}`,
+          },
+        };
+      },
+      transformResponse: ({ data }) => {
+        return data;
+      },
+      providesTags: ["About"],
+    }),
+  }),
+});
 
 export const {
-    useUpdateAboutUsMutation,
-    useAboutUsQuery
+  useGetAboutUsQuery,
+  useCreateAboutUsMutation,
+  useUpdateAboutUsMutation,
+  useDeleteAboutUsMutation,
 } = aboutUsSlice;

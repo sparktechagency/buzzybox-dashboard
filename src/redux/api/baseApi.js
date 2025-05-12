@@ -25,6 +25,8 @@ export const api = createApi({
     "Faq",
     "Contact",
     "Category",
+    "About",
+    "HowItWorks",
   ],
   endpoints: () => ({}),
 });

@@ -146,6 +146,22 @@ const Sidebar = () => {
           ),
         },
         {
+          key: "/about",
+          label: (
+            <Link to="/about" className="text-white hover:text-white">
+              About
+            </Link>
+          ),
+        },
+        {
+          key: "/how-it-works",
+          label: (
+            <Link to="/how-it-works" className="text-white hover:text-white">
+              How it works
+            </Link>
+          ),
+        },
+        {
           key: "/privacy-policy",
           label: (
             <Link to="/privacy-policy" className="text-white hover:text-white">

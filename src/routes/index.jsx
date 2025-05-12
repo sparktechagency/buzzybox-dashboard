@@ -19,6 +19,7 @@ import FaqCollapse from "../Pages/Dashboard/FAQ/FaqCollapse.jsx";
 import Contact from "../Pages/Dashboard/Contact/Contact.jsx";
 import Category from "../Pages/Dashboard/Category/Category.jsx";
 import PrivateRoute from "./ProtectedRoute.jsx";
+import AboutPage from "../Pages/Dashboard/About/page.jsx";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "/category",
         element: <Category />,
+      },
+      {
+        path: "/about",
+        element: <AboutPage />,
       },
       {
         path: "/faq",
