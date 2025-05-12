@@ -20,6 +20,7 @@ import Contact from "../Pages/Dashboard/Contact/Contact.jsx";
 import Category from "../Pages/Dashboard/Category/Category.jsx";
 import PrivateRoute from "./ProtectedRoute.jsx";
 import AboutPage from "../Pages/Dashboard/About/page.jsx";
+import HowItWorksPage from "../Pages/Dashboard/HowItWorks/page.jsx";
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: "/about",
         element: <AboutPage />,
+      },
+      {
+        path: "/how-it-works",
+        element: <HowItWorksPage />,
       },
       {
         path: "/faq",
