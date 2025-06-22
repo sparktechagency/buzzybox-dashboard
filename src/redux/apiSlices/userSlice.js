@@ -9,7 +9,7 @@ const userSlice = api.injectEndpoints({
         if (searchTerm) params.append("searchTerm", searchTerm);
         
         return {
-          url: `/gift-cards/count-gift-cards?${params.toString()}`,
+          url: `/users/all-user?${params.toString()}`,
           method: "GET",
         };
       },

@@ -1,13 +1,10 @@
 import { Checkbox, Form, Input } from "antd";
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import toast, { LoaderIcon } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { saveToAuth } from "../../redux/features/auth/authSlice";
 import { useLoginMutation } from "../../redux/features/auth/authApi";
 
 const Login = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [login, { isLoading }] = useLoginMutation();
@@ -18,10 +15,10 @@ const Login = () => {
       const response = await login(values).unwrap();
 
       if (response.success) {
-        toast.dismiss('loginToast')
+        toast.dismiss("loginToast");
         const accessToken = response?.data?.accessToken;
         dispatch(saveToAuth({ data: { accessToken } }));
-        navigate("/");
+        location.href = "/";
       }
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong", {

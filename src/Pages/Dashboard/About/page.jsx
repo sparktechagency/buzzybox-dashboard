@@ -79,7 +79,9 @@ function AboutPage() {
           handleCancel();
         }
       } catch (error) {
-        toast.error("Failed to update", { id: "updateCategoryToast" });
+        toast.error(error?.data?.message || "Failed to update", {
+          id: "updateCategoryToast",
+        });
         console.log(error);
       }
     } else {

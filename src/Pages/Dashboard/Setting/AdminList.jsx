@@ -92,6 +92,7 @@ const AdminList = () => {
 
     try {
       const res = await addAdmin({ payload: newAdmin }).unwrap();
+      console.log(res);
       if (res.success) {
         toast.success(res.message || "Added successfully", {
           id: "addAdminToast",

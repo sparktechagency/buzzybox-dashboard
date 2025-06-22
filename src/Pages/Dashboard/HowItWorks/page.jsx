@@ -82,7 +82,7 @@ function HowItWorksPage() {
           handleCancel();
         }
       } catch (error) {
-        toast.error("Failed to update", { id: "updateCategoryToast" });
+        toast.error(error?.data?.message || "Failed to update", { id: "updateCategoryToast" });
         console.log(error);
       }
     } else {
@@ -95,7 +95,7 @@ function HowItWorksPage() {
           handleCancel();
         }
       } catch (error) {
-        toast.error("Failed to add", { id: "updateCategoryToast" });
+        toast.error(error?.data?.message || "Failed to add", { id: "updateCategoryToast" });
         console.log(error);
       }
     }
